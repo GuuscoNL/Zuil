@@ -65,8 +65,13 @@ def Moderator():
     print(f"    Datum: {bericht[2]}")
     print(f"    Tijd: {bericht[3]}")
     print(f"    Bericht: {bericht[1]}\n")
-    goedkeuring = input("Keurt u dit bericht goed? (y/n)\n")
+    goedkeuring = input("Keurt u dit bericht goed? (y/n) ")
+    
+    if goedkeuring == "y":
+        print("\nBericht is goedgekeurd!")
+    elif goedkeuring == "n":
+        print("\nBericht is niet goedgekeurd!")
     #TODO: Goedkeuring opslaan ergens
-    #TODO: Bericht in database zetten
+    #TODO: Bericht met goedkeuring in database zetten
     
 main()
