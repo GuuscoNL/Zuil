@@ -32,7 +32,7 @@ def Reiziger(naam = ""):
         station = random.choice(stations)
         berichtInfo["station"] = station.strip()
 
-    commit = input("Will je het bericht versturen?\nAntwoord (y/n): ")
+    commit = input("Wilt u het bericht versturen? (y/n)\n")
     if commit == "y":
         with open("Zuil\\berichten.csv", "a", newline='') as file:
             writer = csv.DictWriter(file, berichtInfo.keys())
@@ -57,10 +57,10 @@ def Moderator():
         print(f"    Tijd: {bericht[3]}")
         print(f"    Bericht: {bericht[1]}\n")
 
-    keuze = int(input("Welk bericht wilt u beoordelen?\n"))
+    keuze = int(input("Welk bericht wilt u beoordelen?\nNummer: "))
 
     bericht = berichten[keuze]
-    print(f"Bericht nummer {keuze}:")
+    print(f"\nBericht nummer {keuze}:")
     print(f"    Naam: {bericht[0]}")
     print(f"    Datum: {bericht[2]}")
     print(f"    Tijd: {bericht[3]}")
