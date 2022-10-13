@@ -53,6 +53,7 @@ def Moderator():
         bericht = berichten[i]
         print(f"Bericht nummer {i}:")
         print(f"    Naam: {bericht[0]}")
+        print(f"    Locatie: {bericht[4]}")
         print(f"    Datum: {bericht[2]}")
         print(f"    Tijd: {bericht[3]}")
         print(f"    Bericht: {bericht[1]}\n")
@@ -62,6 +63,7 @@ def Moderator():
     bericht = berichten[keuze]
     print(f"\nBericht nummer {keuze}:")
     print(f"    Naam: {bericht[0]}")
+    print(f"    Locatie: {bericht[4]}")
     print(f"    Datum: {bericht[2]}")
     print(f"    Tijd: {bericht[3]}")
     print(f"    Bericht: {bericht[1]}\n")
