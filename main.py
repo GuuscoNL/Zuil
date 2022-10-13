@@ -8,7 +8,7 @@ def main():
         Reiziger()
     elif mode == 2:
         Moderator()
-        
+
 def Reiziger(naam = ""):
     berichtInfo = {}
     
@@ -39,6 +39,34 @@ def Reiziger(naam = ""):
             writer.writerow(berichtInfo)
 
 def Moderator():
-    print("Moderator")
+    naam = input("Naam: ")
+    
+    email = input("Email: ")
+    
+    berichten = []
+    with open("Zuil\\berichten.csv", "r") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            berichten.append(row)
+    
+    for i in range(len(berichten)):
+        bericht = berichten[i]
+        print(f"Bericht nummer {i}:")
+        print(f"    Naam: {bericht[0]}")
+        print(f"    Datum: {bericht[2]}")
+        print(f"    Tijd: {bericht[3]}")
+        print(f"    Bericht: {bericht[1]}\n")
 
+    keuze = int(input("Welk bericht wilt u beoordelen?\n"))
+
+    bericht = berichten[keuze]
+    print(f"Bericht nummer {keuze}:")
+    print(f"    Naam: {bericht[0]}")
+    print(f"    Datum: {bericht[2]}")
+    print(f"    Tijd: {bericht[3]}")
+    print(f"    Bericht: {bericht[1]}\n")
+    goedkeuring = input("Keurt u dit bericht goed? (y/n)\n")
+    #TODO: Goedkeuring opslaan ergens
+    #TODO: Bericht in database zetten
+    
 main()
