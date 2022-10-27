@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from datetime import datetime
 import random
 import psycopg2.extras
