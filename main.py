@@ -1,7 +1,6 @@
 from asyncio.windows_events import NULL
 from datetime import datetime
 import random
-import csv
 import psycopg2.extras
 
 connection_string = "host='localhost' dbname='zuil' user='postgres' password='Guus2005!'"
