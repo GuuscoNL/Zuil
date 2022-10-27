@@ -1,9 +1,10 @@
 from datetime import datetime
 import random
 import csv
-import psycopg2
+import psycopg2.extras
 
 connection_string = "host='localhost' dbname='zuil' user='postgres' password='Guus2005!'"
+conn = psycopg2.connect(connection_string)
 STATIONS = ["Hilversum", "Bussum-Zuid", "Naarden-Bussum"]
 
 def main():
@@ -31,7 +32,6 @@ def Reiziger(naam = ""):
     commit = input("Wilt u het bericht versturen? (y/n)\n")
     
     if commit == "y":
-        conn = psycopg2.connect(connection_string)
         cursor = conn.cursor()
         query = """ INSERT INTO bericht(bericht, datumtijd, naamreiziger, station)
                     VALUES
@@ -40,37 +40,38 @@ def Reiziger(naam = ""):
         data = (bericht, datumtijd, naam, station)
         cursor.execute(query, data)
         conn.commit()
-        conn.close()
+
 
 def Moderator():
     naam = input("Naam: ")
     
     email = input("Email: ")
     
-    berichten = []
-    with open("Zuil\\berichten.csv", "r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            berichten.append(row)
+
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = """SELECT * FROM bericht"""
+    
+    cursor.execute(query)
+    berichten = cursor.fetchall()
+    
     
     for i in range(len(berichten)):
         bericht = berichten[i]
         print(f"Bericht nummer {i}:")
-        print(f"    Naam: {bericht[0]}")
-        print(f"    Locatie: {bericht[4]}")
-        print(f"    Datum: {bericht[2]}")
-        print(f"    Tijd: {bericht[3]}")
-        print(f"    Bericht: {bericht[1]}\n")
+        print(f"    Naam: {bericht['naamreiziger']}")
+        print(f"    Station: {bericht['station']}")
+        print(f"    Datum: {bericht['datumtijd'].strftime('%Y-%m-%d')}")
+        print(f"    Tijd: {bericht['datumtijd'].strftime('%H:%M:%S')}")
+        print(f"    Bericht: {bericht['bericht']}\n")
 
     keuze = int(input("Welk bericht wilt u beoordelen?\nNummer: "))
 
     bericht = berichten[keuze]
-    print(f"\nBericht nummer {keuze}:")
-    print(f"    Naam: {bericht[0]}")
-    print(f"    Locatie: {bericht[4]}")
-    print(f"    Datum: {bericht[2]}")
-    print(f"    Tijd: {bericht[3]}")
-    print(f"    Bericht: {bericht[1]}\n")
+    print(f"    Naam: {bericht['naamreiziger']}")
+    print(f"    Station: {bericht['station']}")
+    print(f"    Datum: {bericht['datumtijd'].strftime('%Y-%m-%d')}")
+    print(f"    Tijd: {bericht['datumtijd'].strftime('%H:%M:%S')}")
+    print(f"    Bericht: {bericht['bericht']}\n")
     goedkeuring = input("Keurt u dit bericht goed? (y/n) ")
     
     if goedkeuring == "y":
@@ -78,6 +79,5 @@ def Moderator():
     elif goedkeuring == "n":
         print("\nBericht is niet goedgekeurd!")
     #TODO: Goedkeuring opslaan ergens
-    #TODO: Bericht met goedkeuring in database zetten
     
 main()
