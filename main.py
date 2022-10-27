@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from datetime import datetime
 import random
 import csv
@@ -47,14 +48,33 @@ def Moderator():
     
     email = input("Email: ")
     
-
+    # Kijk of de moderator al bestaat
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    query = """SELECT * FROM bericht"""
+    query = """ SELECT id FROM moderator
+                WHERE naam = %s AND email = %s"""
+    data = (naam, email)
+    cursor.execute(query, data)
+    mod = None
+    for modd in cursor.fetchall():
+        mod = modd
+    if mod['id'] is None:
+        print("Mod account bestaat niet probeer opnieuw")
+        Moderator()
+    
+    # Haal het bericht op bericht
+    query = """ SELECT 	R.id,
+                        R.naamreiziger,
+                        R.station,
+                        R.datumtijd,
+                        R.bericht
+                FROM beoordeling AS L
+	                RIGHT JOIN bericht AS R ON L.berichtid = R.id
+                WHERE
+                    L.id IS NULL;"""
     
     cursor.execute(query)
     berichten = cursor.fetchall()
-    
-    
+    print()
     for i in range(len(berichten)):
         bericht = berichten[i]
         print(f"Bericht nummer {i}:")
@@ -72,12 +92,22 @@ def Moderator():
     print(f"    Datum: {bericht['datumtijd'].strftime('%Y-%m-%d')}")
     print(f"    Tijd: {bericht['datumtijd'].strftime('%H:%M:%S')}")
     print(f"    Bericht: {bericht['bericht']}\n")
-    goedkeuring = input("Keurt u dit bericht goed? (y/n) ")
     
+    goedkeuring = input("Keurt u dit bericht goed? (y/n) ")
+    goedgekeurd = None
     if goedkeuring == "y":
+        goedgekeurd = True
         print("\nBericht is goedgekeurd!")
     elif goedkeuring == "n":
+        goedgekeurd = False
         print("\nBericht is niet goedgekeurd!")
-    #TODO: Goedkeuring opslaan ergens
+
+    cursor = conn.cursor()
+    query = """ INSERT INTO beoordeling(goedgekeurd, datumtijd, berichtid, moderatorid)
+                    VALUES
+                        (%s, %s, %s, %s);"""
+    data = (goedgekeurd, datetime.now(), bericht['id'], mod['id'])
+    cursor.execute(query, data)
+    conn.commit()
     
 main()
