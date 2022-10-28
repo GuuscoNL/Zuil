@@ -74,6 +74,10 @@ def Moderator():
     cursor.execute(query)
     berichten = cursor.fetchall()
     print()
+    if berichten == []:
+        print("Er zijn geen berichten die beoordeeld moet worden")
+        return
+
     for i in range(len(berichten)):
         bericht = berichten[i]
         print(f"Bericht nummer {i}:")
