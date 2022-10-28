@@ -53,9 +53,10 @@ def Moderator():
     data = (naam, email)
     cursor.execute(query, data)
     mod = None
-    for modd in cursor.fetchall():
-        mod = modd
-    if mod['id'] is None:
+    for record in cursor.fetchall():
+        mod = record
+    
+    if mod is None:
         print("Mod account bestaat niet probeer opnieuw")
         Moderator()
     
