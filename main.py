@@ -1,8 +1,8 @@
 from tkinter import *
-from functools import partial
 from datetime import datetime
 import psycopg2
 import random
+import psycopg2.extras
 
 # ---------- Functions ----------
 connection_string = "host='localhost' dbname='zuil' user='postgres' password='Guus2005!'"
