@@ -123,6 +123,9 @@ def menu_change_to_reiziger():
 def reiziger_change_to_menu():
     frame_menu.pack(fill="both", expand=1)
     
+    entry_name.delete(0, "end")
+    entry_bericht.delete(1.0, "end")
+    
     frame_reiziger.forget()
     root.title("Menu")
 
