@@ -1,5 +1,6 @@
 from tkinter import *
 from datetime import datetime
+from functools import partial
 import random
 import psycopg2.extras
 
@@ -9,7 +10,7 @@ conn = psycopg2.connect(connection_string)
 STATIONS = ["Hilversum", "Bussum-Zuid", "Naarden-Bussum"]
 
 
-def Reiziger():
+def Reiziger(entry_naam, entry_bericht, label_info):
     naam = entry_naam.get()
     bericht = entry_bericht.get("1.0",'end-1c')
     if naam == "": naam = "Anoniem"
@@ -33,7 +34,7 @@ def Reiziger():
     data = (bericht, datumtijd, naam, station)
     cursor.execute(query, data)
     conn.commit()
-    label_info["text"] = "Uw bericht is versturen"
+    reiziger_change_to_reiziger_einde()
 
 
 def Moderator():
@@ -125,6 +126,11 @@ def reiziger_change_to_menu():
     frame_reiziger.forget()
     root.title("Menu")
 
+def reiziger_change_to_reiziger_einde():
+    frame_reiziger_einde.pack(fill="both", expand=1)
+    
+    frame_reiziger.forget()
+
 # Initialise app
 winWidth = 400
 winHeight = 300
@@ -186,16 +192,18 @@ def load_reiziger():
 
     label_bericht = Label(sub_frame_bericht, text="bericht: ")
     label_bericht.pack(side="left")
+    
+    label_info = Label(frame_reiziger, text="Laat naam leeg om anoniem te blijven")
 
     entry_bericht = Text(sub_frame_bericht, width=30, height=5)
     entry_bericht.pack(pady=5, side="left")
     button_submit = Button(frame_reiziger, 
                         text="Versturen",
                         cursor="hand2",
-                        command=Reiziger)
+                        command=partial(Reiziger, entry_naam, entry_bericht, label_info))
     button_submit.pack(pady=5)
 
-    label_info = Label(frame_reiziger, text="Laat naam leeg om anoniem te blijven")
+    
     label_info.pack()
 
     sub_frame_backbutton = Frame(frame_reiziger)
@@ -209,10 +217,22 @@ def load_reiziger():
     
     frame_reiziger.forget()
 
+def load_reiziger_einde():
+    global frame_reiziger_einde
+    frame_reiziger_einde = Frame(root)
+    frame_reiziger_einde.pack(fill="both", expand=1)
+
+    label = Label(master=frame_reiziger_einde, 
+                text="Bedankt voor het inzenden, nog een fijne dag!")
+    label.pack(pady=5)
+    
+    frame_reiziger_einde.forget()
+
 
 # Laad alle frames
 load_menu()
 load_reiziger()
+load_reiziger_einde()
 
     
 root.mainloop()
