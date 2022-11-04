@@ -1,6 +1,5 @@
 from tkinter import *
 from datetime import datetime
-import psycopg2
 import random
 import psycopg2.extras
 
@@ -115,12 +114,14 @@ def Moderator():
 
 # ---------- GUI ----------
 
-def change_to_reiziger():
+def menu_change_to_reiziger():
     frame_reiziger.pack(fill="both", expand=1)
     frame_menu.forget()
     root.title("Reiziger")
-def change_to_menu():
+
+def reiziger_change_to_menu():
     frame_menu.pack(fill="both", expand=1)
+    
     frame_reiziger.forget()
     root.title("Menu")
 
@@ -135,92 +136,83 @@ root.geometry(f"{winWidth}x{winHeight}")
 root.resizable(False, False)
 
 # Menu Frame
-frame_menu = Frame(root,
-                   width=winWidth/2,
-                   height=winHeight/2)
-frame_menu.pack(fill="both", expand=1)
+def load_menu():
+    global frame_menu 
+    frame_menu = Frame(root,
+                    width=winWidth/2,
+                    height=winHeight/2)
+    frame_menu.pack(fill="both", expand=1)
+        
+    label = Label(master=frame_menu, 
+                text="Welke modus?")
+    label.pack(pady=10)
 
-#frame_menu.pack_propagate(False)
-    
-label = Label(master=frame_menu, 
-            text="Welke modus?")
-label.pack(pady=10)
+    button_reiziger = Button(master=frame_menu, 
+                            text="Reiziger",
+                            cursor="hand2",
+                            command=menu_change_to_reiziger)
+    button_reiziger.pack(pady=5)
 
-button_reiziger = Button(master=frame_menu, 
-                        text="Reiziger",
-                        cursor="hand2",
-                        command=change_to_reiziger)
-button_reiziger.pack(pady=5)
+    button_moderator = Button(master=frame_menu, 
+                            text="Moderator",
+                            cursor="hand2")
+    button_moderator.pack(pady=5)
 
-button_moderator = Button(master=frame_menu, 
-                        text="Moderator",
+    button_scherm = Button(master=frame_menu, 
+                        text="Stations scherm",
                         cursor="hand2")
-button_moderator.pack(pady=5)
+    button_scherm.pack(pady=5)
 
-button_scherm = Button(master=frame_menu, 
-                    text="Stations scherm",
-                    cursor="hand2")
-button_scherm.pack(pady=5)
+def load_reiziger():
+    global frame_reiziger 
+    frame_reiziger = Frame(root)
+    frame_reiziger.pack(fill="both", expand=1)
 
+    label = Label(master=frame_reiziger, 
+                text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
+    label.pack(pady=5)
 
-frame_reiziger = Frame(root)
-frame_reiziger.pack(fill="both", expand=1)
+    sub_frame_naam = Frame(frame_reiziger)
+    sub_frame_naam.pack(anchor="n", side="top")
 
-label = Label(master=frame_reiziger, 
-            text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
-label.pack(pady=5)
+    label_naam = Label(sub_frame_naam, text="Naam: ")
+    label_naam.pack(side="left")
 
-sub_frame_naam = Frame(frame_reiziger)
-sub_frame_naam.pack(anchor="n", side="top")
+    entry_naam = Entry(sub_frame_naam)
+    entry_naam.pack(pady=5, side="left")
 
-label_naam = Label(sub_frame_naam, text="Naam: ")
-label_naam.pack(side="left")
+    sub_frame_bericht = Frame(frame_reiziger)
+    sub_frame_bericht.pack(anchor="n", side="top")
 
-entry_naam = Entry(sub_frame_naam)
-entry_naam.pack(pady=5, side="left")
+    label_bericht = Label(sub_frame_bericht, text="bericht: ")
+    label_bericht.pack(side="left")
 
-sub_frame_bericht = Frame(frame_reiziger)
-sub_frame_bericht.pack(anchor="n", side="top")
+    entry_bericht = Text(sub_frame_bericht, width=30, height=5)
+    entry_bericht.pack(pady=5, side="left")
+    button_submit = Button(frame_reiziger, 
+                        text="Versturen",
+                        cursor="hand2",
+                        command=Reiziger)
+    button_submit.pack(pady=5)
 
-label_bericht = Label(sub_frame_bericht, text="bericht: ")
-label_bericht.pack(side="left")
+    label_info = Label(frame_reiziger, text="Laat naam leeg om anoniem te blijven")
+    label_info.pack()
 
-entry_bericht = Text(sub_frame_bericht, width=30, height=5)
-entry_bericht.pack(pady=5, side="left")
-button_submit = Button(frame_reiziger, 
-                    text="Versturen",
-                    cursor="hand2",
-                    command=Reiziger)
-button_submit.pack(pady=5)
+    sub_frame_backbutton = Frame(frame_reiziger)
+    sub_frame_backbutton.pack(anchor="s", side="left")
 
-label_info = Label(frame_reiziger, text="Laat naam leeg om anoniem te blijven")
-label_info.pack()
-
-sub_frame_backbutton = LabelFrame(frame_reiziger)
-sub_frame_backbutton.pack(anchor="s", side="left")
-
-button_back = Button(master=sub_frame_backbutton, 
-                    text="back",
-                    cursor="hand2",
-                    command=change_to_menu)
-button_back.pack(anchor="s", side="left")
-
-frame_reiziger.forget()
-
-
-
-
-
-
-
-
-
-
-
-
+    button_back = Button(master=sub_frame_backbutton, 
+                        text="back",
+                        cursor="hand2",
+                        command=reiziger_change_to_menu)
+    button_back.pack(anchor="s", side="left")
     
-    
-    
-    
+    frame_reiziger.forget()
+
+
+# Laad alle frames
+load_menu()
+load_reiziger()
+
     
 root.mainloop()
