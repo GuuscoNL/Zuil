@@ -1,15 +1,21 @@
 from tkinter import *
+from tkinter import messagebox
 from datetime import datetime
 from functools import partial
 import random
 import psycopg2.extras
 
-# ---------- Functions ----------
+# ---------- Global Vars ----------
 connection_string = "host='localhost' dbname='zuil' user='postgres' password='Guus2005!'"
 conn = psycopg2.connect(connection_string)
-STATIONS = ["Hilversum", "Bussum-Zuid", "Naarden-Bussum"]
+STATIONS = ["Hilversum", "Utrecht", "Almere"]
+schermIsOpen = False
 
+# ---------- Fonts ----------
+font_title = ("Courier", 15)
+font_bericht = ("Courier", 10)
 
+# ---------- Functions ----------
 def Reiziger(entry_naam, entry_bericht, label_info):
     naam = entry_naam.get()
     bericht = entry_bericht.get("1.0",'end-1c')
@@ -109,7 +115,31 @@ def Moderator():
     cursor.execute(query, data)
     conn.commit()
 
+def krijg_berichten(station):
+    
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = """ select * from bericht 
+                WHERE station = %s
+                ORDER BY datumtijd DESC
+                LIMIT 5;"""
+    data = (station,)
+    cursor.execute(query, data)
+    return cursor.fetchall()
 
+def maak_bericht_compact(text):
+    woorden = text.split(" ")
+    sublines = [""]
+    index = 0
+    for woord in woorden:
+        if len(sublines[index]) + len(woord) >= 35:
+            index += 1
+            sublines.append(woord + " ")
+        else:
+            sublines[index] += woord + " "
+    bericht_text = ""
+    for subline in sublines:
+        bericht_text += subline + "\n"
+    return bericht_text[:-1]
 
 
 
@@ -120,7 +150,12 @@ def menu_change_to_reiziger():
     frame_menu.forget()
     root.title("Reiziger")
 
-def reiziger_change_to_menu():
+def menu_change_to_stations():
+    frame_stations.pack(fill="both", expand=1)
+    frame_menu.forget()
+    root.title("Stations")
+
+def reiziger_change_to_menu(entry_name, entry_bericht):
     frame_menu.pack(fill="both", expand=1)
     
     entry_name.delete(0, "end")
@@ -133,6 +168,16 @@ def reiziger_change_to_reiziger_einde():
     frame_reiziger_einde.pack(fill="both", expand=1)
     
     frame_reiziger.forget()
+    
+def stations_change_to_menu():
+    frame_menu.pack(fill="both", expand=1)
+    frame_stations.forget()
+
+def top_exit(top): 
+    global schermIsOpen
+    schermIsOpen = False
+    top.destroy()
+
 
 # Initialise app
 winWidth = 400
@@ -169,7 +214,8 @@ def load_menu():
 
     button_scherm = Button(master=frame_menu, 
                         text="Stations scherm",
-                        cursor="hand2")
+                        cursor="hand2",
+                        command=menu_change_to_stations)
     button_scherm.pack(pady=5)
 
 def load_reiziger():
@@ -215,7 +261,7 @@ def load_reiziger():
     button_back = Button(master=sub_frame_backbutton, 
                         text="back",
                         cursor="hand2",
-                        command=reiziger_change_to_menu)
+                        command=partial(reiziger_change_to_menu, entry_naam, entry_bericht))
     button_back.pack(anchor="s", side="left")
     
     frame_reiziger.forget()
@@ -230,12 +276,82 @@ def load_reiziger_einde():
     label.pack(pady=5)
     
     frame_reiziger_einde.forget()
+    
+def load_stations():
+    global frame_stations
+    frame_stations = Frame(root)
+    frame_stations.pack(fill="both", expand=1)
 
+    label = Label(master=frame_stations, 
+                text="Welke station?")
+    label.pack(pady=5)
+    
+    button_hilversum = Button(master=frame_stations, 
+                            text="Hilversum",
+                            cursor="hand2",
+                            command=partial(open_zuilscherm, "Hilversum"))
+    button_hilversum.pack(pady=5)
+
+    button_utrecht = Button(master=frame_stations, 
+                            text="Utrecht",
+                            cursor="hand2",
+                            command=partial(open_zuilscherm, "Utrecht"))
+    button_utrecht.pack(pady=5)
+
+    button_almere = Button(master=frame_stations, 
+                        text="Almere",
+                        cursor="hand2",
+                            command=partial(open_zuilscherm, "Almere"))
+    button_almere.pack(pady=5)
+    
+    sub_frame_backbutton = Frame(frame_stations)
+    sub_frame_backbutton.pack(anchor="s", side="left")
+
+    button_back = Button(master=sub_frame_backbutton, 
+                        text="back",
+                        cursor="hand2",
+                        command=partial(stations_change_to_menu))
+    button_back.pack(anchor="s", side="left")
+    
+    frame_stations.forget()
+
+def open_zuilscherm(station):
+    global schermIsOpen
+    if schermIsOpen: 
+        messagebox.showinfo("Error", "Er is all een stationsscherm open")
+        return
+    
+    global top
+    top = Toplevel(bg="#ffcc17")
+    top.geometry("500x400")
+    
+    label = Label(master=top, text=f"Welkom bij station {station}", bg="#ffcc17", font= font_title)
+    label.pack(pady=10)
+    frame_bericht = Frame(master=top, bg="#ffcc17")
+    frame_bericht.pack(fill="both", expand=1)
+
+    berichten = krijg_berichten(station)
+    
+    for bericht in berichten:
+        bericht_text = bericht["bericht"]
+        
+        bericht_text = maak_bericht_compact(bericht_text)
+        
+        sub_frame_bericht = LabelFrame(master=frame_bericht, bg="#ffcc17", text=f"{bericht['naamreiziger']} zei: ")
+        sub_frame_bericht.pack(pady=3)
+        
+        label = Label(master=sub_frame_bericht, text=bericht_text, font=font_bericht, bg="#ffcc17")
+        label.pack()
+    
+    top.protocol("WM_DELETE_WINDOW", partial(top_exit, top))
+
+    schermIsOpen = True
 
 # Laad alle frames
 load_menu()
 load_reiziger()
 load_reiziger_einde()
+load_stations()
 
     
 root.mainloop()
