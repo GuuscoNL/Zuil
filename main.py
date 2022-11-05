@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import partial
 import random
 import psycopg2.extras
+import pyowm
 
 # ---------- Global Vars ----------
 connection_string = "host='localhost' dbname='zuil' user='postgres' password='Guus2005!'"
@@ -140,6 +141,14 @@ def maak_bericht_compact(text):
     for subline in sublines:
         bericht_text += subline + "\n"
     return bericht_text[:-1]
+
+def krijg_faciliteiten(station):
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = """ SELECT * FROM station_service WHERE station_city = %s;"""
+    data = (station,)
+    cursor.execute(query, data)
+    return cursor.fetchall()
+
 
 
 
@@ -282,8 +291,8 @@ def load_stations():
     frame_stations = Frame(root)
     frame_stations.pack(fill="both", expand=1)
 
-    label = Label(master=frame_stations, 
-                text="Welke station?")
+    label = Label(master=frame_stations,
+                text="Welk station?")
     label.pack(pady=5)
     
     button_hilversum = Button(master=frame_stations, 
@@ -318,15 +327,19 @@ def load_stations():
 def open_zuilscherm(station):
     global schermIsOpen
     if schermIsOpen: 
-        messagebox.showinfo("Error", "Er is all een stationsscherm open")
+        messagebox.showinfo("Error", "Er is al een stationsscherm open")
         return
     
     global top
     top = Toplevel(bg="#ffcc17")
     top.geometry("500x400")
+    root.resizable(False, False)
     
     label = Label(master=top, text=f"Welkom bij station {station}", bg="#ffcc17", font= font_title)
     label.pack(pady=10)
+    
+    # ---------- Berichten ----------
+    
     frame_bericht = Frame(master=top, bg="#ffcc17")
     frame_bericht.pack(fill="both", expand=1)
 
@@ -342,6 +355,61 @@ def open_zuilscherm(station):
         
         label = Label(master=sub_frame_bericht, text=bericht_text, font=font_bericht, bg="#ffcc17")
         label.pack()
+    
+    # ---------- Iconen ----------
+    faciliteiten = krijg_faciliteiten(station)
+    
+    frame_iconen = Frame(master=top, bg="#ffcc17")
+    frame_iconen.pack(anchor="s", side="left")
+    
+    if faciliteiten[0]["ov_bike"]:
+        icon = PhotoImage(file="Zuil\img_faciliteiten\img_ovfiets.png")
+        icon = icon.subsample(2)
+        label = Label(master=frame_iconen, image=icon)
+        label.photo = icon
+        label.pack(side="left", padx=2)
+        
+    if faciliteiten[0]["elevator"]:
+        icon = PhotoImage(file="Zuil\img_faciliteiten\img_lift.png")
+        icon = icon.subsample(2)
+        label = Label(master=frame_iconen, image=icon)
+        label.photo = icon
+        label.pack(side="left", padx=2)
+        
+    if faciliteiten[0]["toilet"]:
+        icon = PhotoImage(file="Zuil\img_faciliteiten\img_toilet.png")
+        icon = icon.subsample(2)
+        label = Label(master=frame_iconen, image=icon)
+        label.photo = icon
+        label.pack(side="left", padx=2)
+        
+    if faciliteiten[0]["park_and_ride"]:
+        icon = PhotoImage(file="Zuil\img_faciliteiten\img_pr.png")
+        icon = icon.subsample(2)
+        label = Label(master=frame_iconen, image=icon)
+        label.photo = icon
+        label.pack(side="left", padx=2)
+    
+    # ---------- Weather ----------
+    
+    owm = pyowm.OWM("6c9174d05f353b6f3fba0d4c53cb4728")
+    
+    mgr = owm.weather_manager()
+    observation = mgr.weather_at_place(station)
+    w = observation.weather
+    
+    temp = w.temperature('celsius')
+    
+    frame_weer = LabelFrame(master=top, bg="#ffcc17", text="Weer")
+    frame_weer.pack(anchor="s", side="right")
+    
+    text_weer = f"""Temp: {temp["temp"]:7} C
+Gevoel: {temp["feels_like"]:5} C
+Max: {temp["temp_max"]:8} C
+Min: {temp["temp_min"]:9} C"""
+    
+    label_weer = Label(master=frame_weer, text=text_weer, bg="#ffcc17")
+    label_weer.pack()
     
     top.protocol("WM_DELETE_WINDOW", partial(top_exit, top))
 
