@@ -16,13 +16,16 @@ schermIsOpen = False
 font_title = ("Courier", 15)
 font_bericht = ("Courier", 10)
 
+
 # ---------- Functions ----------
+
 def Reiziger(entry_naam, entry_bericht, label_info):
-    naam = entry_naam.get()
+    # --- Krijg de input ---
+    naam = entry_naam.get() 
     bericht = entry_bericht.get("1.0",'end-1c')
     if naam == "": naam = "Anoniem"
 
-    if len(bericht) >= 140:
+    if len(bericht) >= 140: # check of het niet meer dan 140 chars zijn
         label_info["text"] = "Uw bericht mag maximaal 140 characters zijn"
         return
     elif len(bericht) == 0:
@@ -33,90 +36,19 @@ def Reiziger(entry_naam, entry_bericht, label_info):
     
     station = random.choice(STATIONS)
     
-    cursor = conn.cursor()
+    # --- Zet het in de database ---
+    cursor = conn.cursor() 
     query = """ INSERT INTO bericht(bericht, datumtijd, naamreiziger, station)
                 VALUES
                     (%s, %s, %s, %s);
             """ 
     data = (bericht, datumtijd, naam, station)
     cursor.execute(query, data)
-    conn.commit()
-    reiziger_change_to_reiziger_einde()
-
-
-def Moderator():
-    naam = input("Naam: ")
-    
-    email = input("Email: ")
-    
-    # Kijk of de moderator al bestaat
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    query = """ SELECT id FROM moderator
-                WHERE naam = %s AND email = %s"""
-    data = (naam, email)
-    cursor.execute(query, data)
-    mod = None
-    for record in cursor.fetchall():
-        mod = record
-    
-    if mod is None:
-        print("Mod account bestaat niet probeer opnieuw")
-        Moderator()
-    
-    # Haal het bericht op bericht
-    query = """ SELECT 	R.id,
-                        R.naamreiziger,
-                        R.station,
-                        R.datumtijd,
-                        R.bericht
-                FROM beoordeling AS L
-	                RIGHT JOIN bericht AS R ON L.berichtid = R.id
-                WHERE
-                    L.id IS NULL;"""
-    
-    cursor.execute(query)
-    berichten = cursor.fetchall()
-
-    if berichten == []:
-        print("Er zijn geen berichten die beoordeeld moet worden")
-        return
-
-    for i in range(len(berichten)):
-        bericht = berichten[i]
-        print(f"Bericht nummer {i}:")
-        print(f"    Naam: {bericht['naamreiziger']}")
-        print(f"    Station: {bericht['station']}")
-        print(f"    Datum: {bericht['datumtijd'].strftime('%Y-%m-%d')}")
-        print(f"    Tijd: {bericht['datumtijd'].strftime('%H:%M:%S')}")
-        print(f"    Bericht: {bericht['bericht']}\n")
-
-    keuze = int(input("Welk bericht wilt u beoordelen?\nNummer: "))
-
-    bericht = berichten[keuze]
-    print(f"    Naam: {bericht['naamreiziger']}")
-    print(f"    Station: {bericht['station']}")
-    print(f"    Datum: {bericht['datumtijd'].strftime('%Y-%m-%d')}")
-    print(f"    Tijd: {bericht['datumtijd'].strftime('%H:%M:%S')}")
-    print(f"    Bericht: {bericht['bericht']}\n")
-    
-    goedkeuring = input("Keurt u dit bericht goed? (y/n) ")
-    goedgekeurd = None
-    if goedkeuring == "y":
-        goedgekeurd = True
-        print("\nBericht is goedgekeurd!")
-    elif goedkeuring == "n":
-        goedgekeurd = False
-        print("\nBericht is niet goedgekeurd!")
-
-    cursor = conn.cursor()
-    query = """ INSERT INTO beoordeling(goedgekeurd, datumtijd, berichtid, moderatorid)
-                    VALUES
-                        (%s, %s, %s, %s);"""
-    data = (goedgekeurd, datetime.now(), bericht['id'], mod['id'])
-    cursor.execute(query, data)
-    conn.commit()
+    conn.commit() 
+    reiziger_change_to_reiziger_einde() # Ga naar de volgende page
 
 def krijg_alle_berichten():
+    # Haal alle berichten uit de database
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     query = """ SELECT 	R.id,
                         R.naamreiziger,
@@ -131,22 +63,28 @@ def krijg_alle_berichten():
     return cursor.fetchall()
 
 def maak_bericht_compact(text, max_char, start_woord=""):
+    # Zet een "\n" na n chars, zodat meer dan één lijn wordt gebruikt
     woorden = text.split(" ")
     woorden.insert(0, start_woord)
     sublines = [""]
     index = 0
+    
     for woord in woorden:
         if len(sublines[index]) + len(woord) >= max_char:
             index += 1
             sublines.append(woord + " ")
         else:
             sublines[index] += woord + " "
+    
     bericht_text = ""
+    
     for subline in sublines:
         bericht_text += subline + "\n"
+    
     return bericht_text[:-1]
 
 def krijg_faciliteiten(station):
+    # Haal alle beschikbare faciliteiten op uit de database
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     query = """ SELECT * FROM station_service WHERE station_city = %s;"""
     data = (station,)
@@ -158,7 +96,7 @@ def mod_login(entry_naam, entry_email, label_info):
     
     email = entry_email.get()
     
-    # Kijk of de moderator al bestaat
+    # Kijk of de moderator bestaat
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     query = """ SELECT id FROM moderator
                 WHERE naam = %s AND email = %s"""
@@ -171,26 +109,91 @@ def mod_login(entry_naam, entry_email, label_info):
     if mod is None:
         label_info["text"] = "Mod account bestaat niet, probeer opnieuw"
     else:
-        global cur_mod
+        global cur_mod # Maak global zodat het later makkelijk kan worden gebruikt
         cur_mod = mod
-        modInlog_change_to_mod()
+        modInlog_change_to_mod() # Ga naar volgende pagina
         
+def listbox_berichten_selected(label_naam, label_station, label_datum, label_bericht, label_goedkeuring, frame_keuringButtons, event):
+    # Wanneer de gebruiker een bericht selecteer update frame_bericht met de juiste gegevens
+    for index in listbox_berichten.curselection(): # check wat is geselecteerd
+        bericht = berichten_lijst[index]
+        label_naam["text"] = f"Naam: {bericht['naamreiziger']}"
+        label_station["text"] = f"Station: {bericht['station']}"
+        label_datum["text"] = f"Datum: {bericht['datumtijd'].strftime('%Y-%m-%d %H:%M:%S')}"
+        label_bericht["text"] = maak_bericht_compact(bericht['bericht'], 35, "Bericht:")
+        
+        if bericht['goedgekeurd']:
+            goedkeuring = "Goedgekeurd"
+            frame_keuringButtons.forget()
+        elif bericht['goedgekeurd'] == False:
+            goedkeuring = "Niet goedgekeurd"
+            frame_keuringButtons.forget()
+        else:
+            goedkeuring = "Nog niet beoordeeld"
+            frame_keuringButtons.pack(pady=5,anchor="w",
+                       side="left")
+        
+        label_goedkeuring["text"] = f"Beoordeling: {goedkeuring}"
+
+def keur_bericht(keuring, label_goedkeuring):
+    for index in listbox_berichten.curselection():# check wat is geselecteerd
+        bericht = berichten_lijst[index]
+        # --- Zet de keuring in de database ---
+        cursor = conn.cursor()
+        query = """ INSERT INTO beoordeling(goedgekeurd, datumtijd, berichtid, moderatorid)
+                        VALUES
+                            (%s, %s, %s, %s);"""
+        data = (keuring, datetime.now(), bericht['id'], cur_mod['id'])
+        cursor.execute(query, data)
+        conn.commit()
+        
+        # --- Laat zien dat het is gekeurd ---
+        if keuring:
+            goedkeuring = "Goedgekeurd"
+        else:
+            goedkeuring = "Niet goedgekeurd"
+        label_goedkeuring["text"] = f"Beoordeling: {goedkeuring}"
+        frame_keuringButtons.forget()
+        
+        update_berichten()
+        
+def update_berichten():
+    # update de berichten in de listbox_berichten
+    listbox_berichten.delete(0, "end") # Leeg de listbox
+    berichten = krijg_alle_berichten()
+    global berichten_lijst
+    berichten_lijst = []
+    for i in range(len(berichten)):
+        bericht = berichten[i]
+        listbox_berichten.insert(i, f"Bericht van: {bericht['naamreiziger']}")
+        
+        if bericht['goedgekeurd'] == True: # Als het goedgekeurd is highlight het groen, anders rood
+            listbox_berichten.itemconfig(i, background="#63ff63")
+        elif bericht['goedgekeurd'] == False:
+            listbox_berichten.itemconfig(i, background= "#ff7a7a")
+        
+        # Zet het bericht in deze lijst, zodat het alter gebruikt kan worden door andere functions
+        berichten_lijst.append(bericht) 
+
 
 # ---------- GUI ----------
 
 def menu_change_to_reiziger():
     page_reiziger.pack(fill="both", expand=1)
+    
     page_menu.forget()
     root.title("Reiziger")
 
 def menu_change_to_stations():
     page_stations.pack(fill="both", expand=1)
+    
     page_menu.forget()
     root.title("Stations")
 
 def reiziger_change_to_menu(entry_name, entry_bericht):
     page_menu.pack(fill="both", expand=1)
     
+    # Delete alles wat in de entries staat
     entry_name.delete(0, "end")
     entry_bericht.delete(1.0, "end")
     
@@ -204,10 +207,13 @@ def reiziger_change_to_reiziger_einde():
     
 def stations_change_to_menu():
     page_menu.pack(fill="both", expand=1)
+    
     page_stations.forget()
     root.title("Menu")
 
 def top_exit(top): 
+    # Wanneer de Zuilscherm word gesloten zet schermIsOpen op false, 
+    # zodat er nog een scherm kan worden geopend
     global schermIsOpen
     schermIsOpen = False
     top.destroy()
@@ -221,6 +227,7 @@ def menu_change_to_modInlog():
 def modInlog_change_to_menu():
     page_menu.pack(fill="both", expand=1)
     
+     # Delete alles wat in de entries staat
     entry_mod_naam.delete(0, "end")
     entry_mod_email.delete(0, "end")
     
@@ -236,68 +243,12 @@ def modInlog_change_to_mod():
 def mod_change_to_menu():
     page_menu.pack(fill="both", expand=1)
     
+    # Delete alles wat in de entries staat
     entry_mod_naam.delete(0, "end")
     entry_mod_email.delete(0, "end")
     
     page_mod.forget()
     root.title("Menu")
-
-def listbox_berichten_selected(label_naam, label_station, label_datum, label_bericht, label_goedkeuring, frame_keuringButtons, event):
-    for index in listbox_berichten.curselection():
-        bericht = berichten_lijst[index]
-        label_naam["text"] = f"Naam: {bericht['naamreiziger']}"
-        label_station["text"] = f"Station: {bericht['station']}"
-        label_datum["text"] = f"Datum: {bericht['datumtijd'].strftime('%Y-%m-%d %H:%M:%S')}"
-        label_bericht["text"] = maak_bericht_compact(bericht['bericht'], 35, "Bericht:")
-        
-        if bericht['goedgekeurd']:
-            goedkeuring = "Goedgekeurd"
-            frame_keuringButtons.forget()
-            
-        elif bericht['goedgekeurd'] == False:
-            goedkeuring = "Niet goedgekeurd"
-            frame_keuringButtons.forget()
-        else:
-            goedkeuring = "Nog niet beoordeeld"
-            frame_keuringButtons.pack(pady=5,anchor="w",
-                       side="left")
-        
-        label_goedkeuring["text"] = f"Beoordeling: {goedkeuring}"
-
-def keur_bericht(keuring, label_goedkeuring):
-    for index in listbox_berichten.curselection():
-        bericht = berichten_lijst[index]
-        cursor = conn.cursor()
-        query = """ INSERT INTO beoordeling(goedgekeurd, datumtijd, berichtid, moderatorid)
-                        VALUES
-                            (%s, %s, %s, %s);"""
-        data = (keuring, datetime.now(), bericht['id'], cur_mod['id'])
-        cursor.execute(query, data)
-        conn.commit()
-        if keuring:
-            goedkeuring = "Goedgekeurd"
-        else:
-            goedkeuring = "Niet goedgekeurd"
-        label_goedkeuring["text"] = f"Beoordeling: {goedkeuring}"
-        frame_keuringButtons.forget()
-        
-        update_berichten()
-        
-def update_berichten():
-    listbox_berichten.delete(0, "end")
-    berichten = krijg_alle_berichten()
-    global berichten_lijst
-    berichten_lijst = []
-    for i in range(len(berichten)):
-        bericht = berichten[i]
-        listbox_berichten.insert(i, f"Bericht van: {bericht['naamreiziger']}")
-        
-        if bericht['goedgekeurd'] == True:
-            listbox_berichten.itemconfig(i, background="#63ff63")
-        elif bericht['goedgekeurd'] == False:
-            listbox_berichten.itemconfig(i, background= "#ff7a7a")
-            
-        berichten_lijst.append(bericht)
 
 # Initialise app
 winWidth = 400
@@ -305,12 +256,11 @@ winHeight = 300
 
 root = Tk()
 root.title("Menu")
-#root.eval("tk::PlaceWindow . center")
 root.geometry(f"{winWidth}x{winHeight}")
 root.resizable(False, False)
 root.iconbitmap("Zuil/images/NS-logo.ico")
 
-# Menu Frame
+
 def load_menu():
     global page_menu 
     page_menu = Frame(root,
@@ -459,7 +409,9 @@ def open_zuilscherm(station):
 
     berichten = krijg_alle_berichten()
     
+    index = 0
     for bericht in berichten:
+        if index >= 4: break
         if bericht["goedgekeurd"] == False or bericht["goedgekeurd"] is None: continue
         if bericht["station"] != station: continue
         bericht_text = bericht["bericht"]
@@ -471,6 +423,7 @@ def open_zuilscherm(station):
         
         label_title = Label(master=sub_frame_bericht, text=bericht_text, font=font_bericht, bg="#ffcc17")
         label_title.pack()
+        index += 1
     
     # ---------- Iconen ----------
     faciliteiten = krijg_faciliteiten(station)
