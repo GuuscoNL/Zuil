@@ -14,7 +14,7 @@ schermIsOpen = False
 
 # ---------- Fonts ----------
 font_title = ("Courier", 15)
-font_bericht = ("Courier", 10)
+font_bericht = ("Courier", 9)
 
 
 # ---------- Functions ----------
@@ -428,12 +428,12 @@ def open_stationsscherm(station):
         if bericht["station"] != station: continue # Laat alleen berichten zien die bij dit station horen
         bericht_text = bericht["bericht"]
         
-        bericht_text = maak_bericht_compact(bericht_text, 35)
+        bericht_text = maak_bericht_compact(bericht_text, 55)
         
         sub_frame_bericht = LabelFrame(master=frame_bericht, 
                                        bg="#ffcc17", 
                                        text=f"{bericht['naamreiziger']} zei: ")
-        sub_frame_bericht.pack(pady=3)
+        sub_frame_bericht.pack(pady=1)
         
         label_bericht = Label(master=sub_frame_bericht, 
                             text=bericht_text, 
