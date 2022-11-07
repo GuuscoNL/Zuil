@@ -301,7 +301,7 @@ def load_menu():
     button_moderator.pack(pady=5)
 
     button_scherm = Button(master=page_menu, 
-                        text="Stations scherm",
+                        text="Station scherm",
                         cursor="hand2",
                         command=menu_change_to_stations)
     button_scherm.pack(pady=5)
@@ -418,15 +418,16 @@ def open_stationsscherm(station):
     
     global top
     top = Toplevel(bg="#ffcc17")
-    top.geometry("500x400")
+    top.geometry("550x500")
     top.iconbitmap("Zuil/images/NS-logo.ico")
     top.resizable(False, False)
+    top.title("Station scherm")
     
     label_title = Label(master=top, 
                         text=f"Welkom bij station {station}", 
                         bg="#ffcc17", 
                         font=font_title)
-    label_title.pack(pady=10)
+    label_title.pack(pady=8)
     
     # ---------- Berichten ----------
     
