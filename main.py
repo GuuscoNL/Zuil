@@ -262,15 +262,17 @@ root.iconbitmap("Zuil/images/NS-logo.ico")
 
 
 def load_menu():
+    # Menu om uit de drie opties te kiezen: Reiziger, Moderator of het Stationsscherm
+    
     global page_menu 
     page_menu = Frame(root,
                     width=winWidth/2,
                     height=winHeight/2)
     page_menu.pack(fill="both", expand=1)
         
-    label = Label(master=page_menu, 
+    label_title = Label(master=page_menu, 
                 text="Welke modus?")
-    label.pack(pady=10)
+    label_title.pack(pady=10)
 
     button_reiziger = Button(master=page_menu, 
                             text="Reiziger",
@@ -291,32 +293,34 @@ def load_menu():
     button_scherm.pack(pady=5)
 
 def load_reiziger():
+    # Op deze pagina kan de gebruiker een bericht maken die dan in de database wordt gezet.
+    
     global page_reiziger 
     page_reiziger = Frame(root)
     page_reiziger.pack(fill="both", expand=1)
 
-    label = Label(master=page_reiziger, 
-                text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
-    label.pack(pady=5)
+    label_title = Label(master=page_reiziger, 
+                        text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
+    label_title.pack(pady=5)
 
-    sub_frame_naam = Frame(page_reiziger)
-    sub_frame_naam.pack(anchor="n", side="top")
+    frame_naam = Frame(page_reiziger)
+    frame_naam.pack(anchor="n", side="top")
 
-    label_naam = Label(sub_frame_naam, text="Naam: ")
+    label_naam = Label(frame_naam, text="Naam: ")
     label_naam.pack(side="left")
 
-    entry_naam = Entry(sub_frame_naam)
+    entry_naam = Entry(frame_naam)
     entry_naam.pack(pady=5, side="left")
 
-    sub_frame_bericht = Frame(page_reiziger)
-    sub_frame_bericht.pack(anchor="n", side="top")
+    frame_bericht = Frame(page_reiziger)
+    frame_bericht.pack(anchor="n", side="top")
 
-    label_bericht = Label(sub_frame_bericht, text="bericht: ")
+    label_bericht = Label(frame_bericht, text="bericht: ")
     label_bericht.pack(side="left")
     
     label_info = Label(page_reiziger, text="Laat naam leeg om anoniem te blijven")
 
-    entry_bericht = Text(sub_frame_bericht, width=30, height=5)
+    entry_bericht = Text(frame_bericht, width=30, height=5)
     entry_bericht.pack(pady=5, side="left")
     button_submit = Button(page_reiziger, 
                         text="Versturen",
@@ -324,7 +328,6 @@ def load_reiziger():
                         command=partial(Reiziger, entry_naam, entry_bericht, label_info))
     button_submit.pack(pady=5)
 
-    
     label_info.pack()
 
     sub_frame_backbutton = Frame(page_reiziger)
@@ -339,41 +342,45 @@ def load_reiziger():
     page_reiziger.forget()
 
 def load_reiziger_einde():
+    # Deze pagina krijgt de gebruiker te zien wanneer het bericht is verstuurd
+    
     global page_reiziger_einde
     page_reiziger_einde = Frame(root)
     page_reiziger_einde.pack(fill="both", expand=1)
 
-    label = Label(master=page_reiziger_einde, 
+    label_title = Label(master=page_reiziger_einde, 
                 text="Bedankt voor het inzenden, nog een fijne dag!")
-    label.pack(pady=5)
+    label_title.pack(pady=5)
     
     page_reiziger_einde.forget()
     
 def load_stations():
+    # Op deze pagina kan de gebruiker kiezen van welk station de stationsscherm is.
+    
     global page_stations
     page_stations = Frame(root)
     page_stations.pack(fill="both", expand=1)
 
-    label = Label(master=page_stations,
+    label_title = Label(master=page_stations,
                 text="Welk station?")
-    label.pack(pady=5)
+    label_title.pack(pady=5)
     
     button_hilversum = Button(master=page_stations, 
                             text="Hilversum",
                             cursor="hand2",
-                            command=partial(open_zuilscherm, "Hilversum"))
+                            command=partial(open_stationsscherm, "Hilversum"))
     button_hilversum.pack(pady=5)
 
     button_utrecht = Button(master=page_stations, 
                             text="Utrecht",
                             cursor="hand2",
-                            command=partial(open_zuilscherm, "Utrecht"))
+                            command=partial(open_stationsscherm, "Utrecht"))
     button_utrecht.pack(pady=5)
 
     button_almere = Button(master=page_stations, 
                         text="Almere",
                         cursor="hand2",
-                            command=partial(open_zuilscherm, "Almere"))
+                            command=partial(open_stationsscherm, "Almere"))
     button_almere.pack(pady=5)
     
     sub_frame_backbutton = Frame(page_stations)
@@ -382,12 +389,14 @@ def load_stations():
     button_back = Button(master=sub_frame_backbutton, 
                         text="back",
                         cursor="hand2",
-                        command=partial(stations_change_to_menu))
+                        command=stations_change_to_menu)
     button_back.pack(anchor="s", side="left")
     
     page_stations.forget()
 
-def open_zuilscherm(station):
+def open_stationsscherm(station):
+    # Het stationsscherm dat in het station staat
+    
     global schermIsOpen
     if schermIsOpen: 
         messagebox.showinfo("Error", "Er is al een stationsscherm open")
@@ -399,7 +408,10 @@ def open_zuilscherm(station):
     top.iconbitmap("Zuil/images/NS-logo.ico")
     top.resizable(False, False)
     
-    label_title = Label(master=top, text=f"Welkom bij station {station}", bg="#ffcc17", font= font_title)
+    label_title = Label(master=top, 
+                        text=f"Welkom bij station {station}", 
+                        bg="#ffcc17", 
+                        font=font_title)
     label_title.pack(pady=10)
     
     # ---------- Berichten ----------
@@ -411,18 +423,23 @@ def open_zuilscherm(station):
     
     index = 0
     for bericht in berichten:
-        if index >= 4: break
-        if bericht["goedgekeurd"] == False or bericht["goedgekeurd"] is None: continue
-        if bericht["station"] != station: continue
+        if index >= 5: break # Laat alleen de eerste 5 berichten zien
+        if bericht["goedgekeurd"] == False or bericht["goedgekeurd"] is None: continue # Laat alleen berichten zien die zijn goedgekeurd
+        if bericht["station"] != station: continue # Laat alleen berichten zien die bij dit station horen
         bericht_text = bericht["bericht"]
         
         bericht_text = maak_bericht_compact(bericht_text, 35)
         
-        sub_frame_bericht = LabelFrame(master=frame_bericht, bg="#ffcc17", text=f"{bericht['naamreiziger']} zei: ")
+        sub_frame_bericht = LabelFrame(master=frame_bericht, 
+                                       bg="#ffcc17", 
+                                       text=f"{bericht['naamreiziger']} zei: ")
         sub_frame_bericht.pack(pady=3)
         
-        label_title = Label(master=sub_frame_bericht, text=bericht_text, font=font_bericht, bg="#ffcc17")
-        label_title.pack()
+        label_bericht = Label(master=sub_frame_bericht, 
+                            text=bericht_text, 
+                            font=font_bericht, 
+                            bg="#ffcc17")
+        label_bericht.pack()
         index += 1
     
     # ---------- Iconen ----------
@@ -459,7 +476,7 @@ def open_zuilscherm(station):
         label_title.photo = icon
         label_title.pack(side="left", padx=2)
 
-    # ---------- Weather ----------
+    # ---------- Weer ----------
     
     owm = pyowm.OWM("6c9174d05f353b6f3fba0d4c53cb4728")
     
@@ -480,11 +497,14 @@ Min: {temp["temp_min"]:9} C"""
     label_weer = Label(master=frame_weer, text=text_weer, bg="#ffcc17")
     label_weer.pack()
     
-    top.protocol("WM_DELETE_WINDOW", partial(top_exit, top))
+    
+    top.protocol("WM_DELETE_WINDOW", partial(top_exit, top)) # Wanneer de window wordt gesloten voer top_exit() uit
 
     schermIsOpen = True
 
 def load_modInlog():
+    # Op deze pagina de gebruiker kan inloggen als een moderator
+    
     global page_modInlog
     page_modInlog = Frame(root)
     page_modInlog.pack(fill="both", expand=1)
@@ -499,7 +519,7 @@ def load_modInlog():
     label_naam = Label(sub_frame_naam, text="Naam: ")
     label_naam.pack(side="left")
 
-    global entry_mod_naam
+    global entry_mod_naam # global, zodat het later makkelijk gebruikt kan worden
     entry_mod_naam = Entry(sub_frame_naam, width=15)
     entry_mod_naam.pack(pady=5, side="left")
 
@@ -508,21 +528,20 @@ def load_modInlog():
 
     label_bericht = Label(sub_frame_bericht, text="email: ")
     label_bericht.pack(side="left")
-    
-    label_info = Label(page_modInlog, text="")
 
-    global entry_mod_email
+    global entry_mod_email # global, zodat het later makkelijk gebruikt kan worden
     entry_mod_email = Entry(sub_frame_bericht, width=27)
     entry_mod_email.pack(pady=5, side="left")
-    button_submit = Button(page_modInlog, 
+    
+    label_info = Label(page_modInlog, text="")
+    
+    button_logIn = Button(page_modInlog, 
                         text="Log in",
                         cursor="hand2",
                         command=partial(mod_login, entry_mod_naam, entry_mod_email, label_info))
-    button_submit.pack(pady=5)
-
+    button_logIn.pack(pady=5)
     
     label_info.pack()
-    
     
     sub_frame_backbutton = Frame(page_modInlog)
     sub_frame_backbutton.pack(anchor="s", side="left")
@@ -536,21 +555,22 @@ def load_modInlog():
     page_modInlog.forget()
 
 def load_mod():
+    # Hier kan de moderator alle berichten bekijken en beoordelen
+    
     global page_mod
     page_mod = Frame(root)
     page_mod.pack(fill="both", expand=1)
     
-    label = Label(master=page_mod, 
+    label_title = Label(master=page_mod, 
                   text="Berichten")
-    label.pack()
+    label_title.pack()
     
     frame_listbox = Frame(master=page_mod)
     frame_listbox.pack(anchor="w", side="left")
     
     scrollbar = Scrollbar(frame_listbox, orient=VERTICAL)
     
-    
-    global listbox_berichten
+    global listbox_berichten # global, zodat het later makkelijk gebruikt kan worden
     listbox_berichten = Listbox(master=frame_listbox, 
                                 height = 10, 
                                 width = 30,
@@ -560,7 +580,6 @@ def load_mod():
     
     scrollbar.config(command=listbox_berichten.yview)
     scrollbar.pack(side="left", fill=Y)
-    
     
     frame_bericht = LabelFrame(master=page_mod,
                                text="Bericht")
@@ -587,7 +606,7 @@ def load_mod():
                           text="Goedkeuring: ")
     label_goedkeuring.pack(anchor="w")
     
-    global frame_keuringButtons
+    global frame_keuringButtons # global, zodat het later makkelijk gebruikt kan worden
     frame_keuringButtons = Frame(master=frame_bericht)
     frame_keuringButtons.pack(pady=5,anchor="w",
                        side="left")
@@ -599,15 +618,14 @@ def load_mod():
                          anchor="w",
                          side="left")
     
-    button_keuraf = Button(master=frame_keuringButtons,
+    button_keurAf = Button(master=frame_keuringButtons,
                              text="Keur niet goed",
                              command=partial(keur_bericht, False, label_goedkeuring))
-    button_keuraf.pack(padx=5,
+    button_keurAf.pack(padx=5,
                        anchor="w",
                        side="left")
     
     frame_keuringButtons.forget()
-    
     
     listbox_berichten.bind("<<ListboxSelect>>", partial(listbox_berichten_selected, 
                                                         label_naam, label_station, 
