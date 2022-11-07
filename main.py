@@ -179,32 +179,32 @@ def mod_login(entry_naam, entry_email, label_info):
 # ---------- GUI ----------
 
 def menu_change_to_reiziger():
-    frame_reiziger.pack(fill="both", expand=1)
-    frame_menu.forget()
+    page_reiziger.pack(fill="both", expand=1)
+    page_menu.forget()
     root.title("Reiziger")
 
 def menu_change_to_stations():
-    frame_stations.pack(fill="both", expand=1)
-    frame_menu.forget()
+    page_stations.pack(fill="both", expand=1)
+    page_menu.forget()
     root.title("Stations")
 
 def reiziger_change_to_menu(entry_name, entry_bericht):
-    frame_menu.pack(fill="both", expand=1)
+    page_menu.pack(fill="both", expand=1)
     
     entry_name.delete(0, "end")
     entry_bericht.delete(1.0, "end")
     
-    frame_reiziger.forget()
+    page_reiziger.forget()
     root.title("Menu")
 
 def reiziger_change_to_reiziger_einde():
-    frame_reiziger_einde.pack(fill="both", expand=1)
+    page_reiziger_einde.pack(fill="both", expand=1)
     
-    frame_reiziger.forget()
+    page_reiziger.forget()
     
 def stations_change_to_menu():
-    frame_menu.pack(fill="both", expand=1)
-    frame_stations.forget()
+    page_menu.pack(fill="both", expand=1)
+    page_stations.forget()
     root.title("Menu")
 
 def top_exit(top): 
@@ -213,29 +213,29 @@ def top_exit(top):
     top.destroy()
     
 def menu_change_to_modInlog():
-    frame_modInlog.pack(fill="both", expand=1)
+    page_modInlog.pack(fill="both", expand=1)
     
-    frame_menu.forget()
+    page_menu.forget()
     root.title("Moderator login")
 
 def modInlog_change_to_menu(entry_naam, entry_email):
-    frame_menu.pack(fill="both", expand=1)
+    page_menu.pack(fill="both", expand=1)
     
     entry_naam.delete(0, "end")
     entry_email.delete(0, "end")
     
-    frame_modInlog.forget()
+    page_modInlog.forget()
     root.title("Menu")
     
 def modInlog_change_to_mod():
-    frame_mod.pack(fill="both", expand=1)
+    page_mod.pack(fill="both", expand=1)
     
-    frame_modInlog.forget()
+    page_modInlog.forget()
     root.title("Moderator")
     
 def mod_change_to_menu():
-    frame_menu.pack(fill="both", expand=1)
-    frame_mod.forget()
+    page_menu.pack(fill="both", expand=1)
+    page_mod.forget()
     root.title("Menu")
 
 def listbox_berichten_selected(label_naam, label_station, label_datum, label_bericht, label_goedkeuring, frame_keuringButtons, event):
@@ -307,44 +307,44 @@ root.resizable(False, False)
 
 # Menu Frame
 def load_menu():
-    global frame_menu 
-    frame_menu = Frame(root,
+    global page_menu 
+    page_menu = Frame(root,
                     width=winWidth/2,
                     height=winHeight/2)
-    frame_menu.pack(fill="both", expand=1)
+    page_menu.pack(fill="both", expand=1)
         
-    label = Label(master=frame_menu, 
+    label = Label(master=page_menu, 
                 text="Welke modus?")
     label.pack(pady=10)
 
-    button_reiziger = Button(master=frame_menu, 
+    button_reiziger = Button(master=page_menu, 
                             text="Reiziger",
                             cursor="hand2",
                             command=menu_change_to_reiziger)
     button_reiziger.pack(pady=5)
 
-    button_moderator = Button(master=frame_menu, 
+    button_moderator = Button(master=page_menu, 
                             text="Moderator",
                             cursor="hand2",
                             command=menu_change_to_modInlog)
     button_moderator.pack(pady=5)
 
-    button_scherm = Button(master=frame_menu, 
+    button_scherm = Button(master=page_menu, 
                         text="Stations scherm",
                         cursor="hand2",
                         command=menu_change_to_stations)
     button_scherm.pack(pady=5)
 
 def load_reiziger():
-    global frame_reiziger 
-    frame_reiziger = Frame(root)
-    frame_reiziger.pack(fill="both", expand=1)
+    global page_reiziger 
+    page_reiziger = Frame(root)
+    page_reiziger.pack(fill="both", expand=1)
 
-    label = Label(master=frame_reiziger, 
+    label = Label(master=page_reiziger, 
                 text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
     label.pack(pady=5)
 
-    sub_frame_naam = Frame(frame_reiziger)
+    sub_frame_naam = Frame(page_reiziger)
     sub_frame_naam.pack(anchor="n", side="top")
 
     label_naam = Label(sub_frame_naam, text="Naam: ")
@@ -353,17 +353,17 @@ def load_reiziger():
     entry_naam = Entry(sub_frame_naam)
     entry_naam.pack(pady=5, side="left")
 
-    sub_frame_bericht = Frame(frame_reiziger)
+    sub_frame_bericht = Frame(page_reiziger)
     sub_frame_bericht.pack(anchor="n", side="top")
 
     label_bericht = Label(sub_frame_bericht, text="bericht: ")
     label_bericht.pack(side="left")
     
-    label_info = Label(frame_reiziger, text="Laat naam leeg om anoniem te blijven")
+    label_info = Label(page_reiziger, text="Laat naam leeg om anoniem te blijven")
 
     entry_bericht = Text(sub_frame_bericht, width=30, height=5)
     entry_bericht.pack(pady=5, side="left")
-    button_submit = Button(frame_reiziger, 
+    button_submit = Button(page_reiziger, 
                         text="Versturen",
                         cursor="hand2",
                         command=partial(Reiziger, entry_naam, entry_bericht, label_info))
@@ -372,7 +372,7 @@ def load_reiziger():
     
     label_info.pack()
 
-    sub_frame_backbutton = Frame(frame_reiziger)
+    sub_frame_backbutton = Frame(page_reiziger)
     sub_frame_backbutton.pack(anchor="s", side="left")
 
     button_back = Button(master=sub_frame_backbutton, 
@@ -381,47 +381,47 @@ def load_reiziger():
                         command=partial(reiziger_change_to_menu, entry_naam, entry_bericht))
     button_back.pack(anchor="s", side="left")
     
-    frame_reiziger.forget()
+    page_reiziger.forget()
 
 def load_reiziger_einde():
-    global frame_reiziger_einde
-    frame_reiziger_einde = Frame(root)
-    frame_reiziger_einde.pack(fill="both", expand=1)
+    global page_reiziger_einde
+    page_reiziger_einde = Frame(root)
+    page_reiziger_einde.pack(fill="both", expand=1)
 
-    label = Label(master=frame_reiziger_einde, 
+    label = Label(master=page_reiziger_einde, 
                 text="Bedankt voor het inzenden, nog een fijne dag!")
     label.pack(pady=5)
     
-    frame_reiziger_einde.forget()
+    page_reiziger_einde.forget()
     
 def load_stations():
-    global frame_stations
-    frame_stations = Frame(root)
-    frame_stations.pack(fill="both", expand=1)
+    global page_stations
+    page_stations = Frame(root)
+    page_stations.pack(fill="both", expand=1)
 
-    label = Label(master=frame_stations,
+    label = Label(master=page_stations,
                 text="Welk station?")
     label.pack(pady=5)
     
-    button_hilversum = Button(master=frame_stations, 
+    button_hilversum = Button(master=page_stations, 
                             text="Hilversum",
                             cursor="hand2",
                             command=partial(open_zuilscherm, "Hilversum"))
     button_hilversum.pack(pady=5)
 
-    button_utrecht = Button(master=frame_stations, 
+    button_utrecht = Button(master=page_stations, 
                             text="Utrecht",
                             cursor="hand2",
                             command=partial(open_zuilscherm, "Utrecht"))
     button_utrecht.pack(pady=5)
 
-    button_almere = Button(master=frame_stations, 
+    button_almere = Button(master=page_stations, 
                         text="Almere",
                         cursor="hand2",
                             command=partial(open_zuilscherm, "Almere"))
     button_almere.pack(pady=5)
     
-    sub_frame_backbutton = Frame(frame_stations)
+    sub_frame_backbutton = Frame(page_stations)
     sub_frame_backbutton.pack(anchor="s", side="left")
 
     button_back = Button(master=sub_frame_backbutton, 
@@ -430,7 +430,7 @@ def load_stations():
                         command=partial(stations_change_to_menu))
     button_back.pack(anchor="s", side="left")
     
-    frame_stations.forget()
+    page_stations.forget()
 
 def open_zuilscherm(station):
     global schermIsOpen
@@ -526,15 +526,15 @@ Min: {temp["temp_min"]:9} C"""
     schermIsOpen = True
 
 def load_modInlog():
-    global frame_modInlog
-    frame_modInlog = Frame(root)
-    frame_modInlog.pack(fill="both", expand=1)
+    global page_modInlog
+    page_modInlog = Frame(root)
+    page_modInlog.pack(fill="both", expand=1)
 
-    label_title = Label(master=frame_modInlog, 
+    label_title = Label(master=page_modInlog, 
                 text="Log in met je naam en email",)
     label_title.pack(pady=5)
 
-    sub_frame_naam = Frame(frame_modInlog)
+    sub_frame_naam = Frame(page_modInlog)
     sub_frame_naam.pack(anchor="n", side="top")
 
     label_naam = Label(sub_frame_naam, text="Naam: ")
@@ -543,17 +543,17 @@ def load_modInlog():
     entry_naam = Entry(sub_frame_naam, width=15)
     entry_naam.pack(pady=5, side="left")
 
-    sub_frame_bericht = Frame(frame_modInlog)
+    sub_frame_bericht = Frame(page_modInlog)
     sub_frame_bericht.pack(anchor="n", side="top")
 
     label_bericht = Label(sub_frame_bericht, text="email: ")
     label_bericht.pack(side="left")
     
-    label_info = Label(frame_modInlog, text="")
+    label_info = Label(page_modInlog, text="")
 
     entry_email = Entry(sub_frame_bericht, width=27)
     entry_email.pack(pady=5, side="left")
-    button_submit = Button(frame_modInlog, 
+    button_submit = Button(page_modInlog, 
                         text="Log in",
                         cursor="hand2",
                         command=partial(mod_login, entry_naam, entry_email, label_info))
@@ -563,7 +563,7 @@ def load_modInlog():
     label_info.pack()
     
     
-    sub_frame_backbutton = Frame(frame_modInlog)
+    sub_frame_backbutton = Frame(page_modInlog)
     sub_frame_backbutton.pack(anchor="s", side="left")
 
     button_back = Button(master=sub_frame_backbutton, 
@@ -572,19 +572,19 @@ def load_modInlog():
                         command=partial(modInlog_change_to_menu, entry_naam, entry_email))
     button_back.pack(anchor="s", side="left")
     
-    frame_modInlog.forget()
+    page_modInlog.forget()
 
 
 def load_mod():
-    global frame_mod
-    frame_mod = Frame(root)
-    frame_mod.pack(fill="both", expand=1)
+    global page_mod
+    page_mod = Frame(root)
+    page_mod.pack(fill="both", expand=1)
     
-    label = Label(master=frame_mod, 
+    label = Label(master=page_mod, 
                   text="Berichten")
     label.pack()
     
-    frame_listbox = Frame(master=frame_mod)
+    frame_listbox = Frame(master=page_mod)
     frame_listbox.pack(anchor="w", side="left")
     
     scrollbar = Scrollbar(frame_listbox, orient=VERTICAL)
@@ -602,7 +602,7 @@ def load_mod():
     scrollbar.pack(side="left", fill=Y)
     
     
-    frame_bericht = LabelFrame(master=frame_mod,
+    frame_bericht = LabelFrame(master=page_mod,
                                text="Bericht")
     frame_bericht.pack(anchor="w",
                        side="left")
@@ -657,7 +657,7 @@ def load_mod():
     
     update_berichten()
     
-    sub_frame_backbutton = Frame(frame_mod)
+    sub_frame_backbutton = Frame(page_mod)
     sub_frame_backbutton.place(x=3, y=winHeight-27)
 
     button_back = Button(master=sub_frame_backbutton, 
@@ -667,7 +667,7 @@ def load_mod():
     button_back.pack(anchor="s", side="left")
     
     
-    frame_mod.forget()
+    page_mod.forget()
 
 
 # Laad alle frames
