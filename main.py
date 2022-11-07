@@ -55,9 +55,12 @@ def krijg_alle_berichten():
                         R.station,
                         R.datumtijd,
                         R.bericht,
-                        L.goedgekeurd
+                        L.goedgekeurd,
+                        moderator.naam,
+                        moderator.email
                 FROM beoordeling AS L
-	                RIGHT JOIN bericht AS R ON L.berichtid = R.id
+                    RIGHT JOIN bericht AS R ON L.berichtid = R.id
+                    RIGHT JOIN moderator AS moderator ON moderator.id = L.moderatorid
                 ORDER BY datumtijd DESC;"""
     cursor.execute(query)
     return cursor.fetchall()
@@ -113,7 +116,8 @@ def mod_login(entry_naam, entry_email, label_info):
         cur_mod = mod
         modInlog_change_to_mod() # Ga naar volgende pagina
         
-def listbox_berichten_selected(label_naam, label_station, label_datum, label_bericht, label_goedkeuring, frame_keuringButtons, event):
+def listbox_berichten_selected(label_naam, label_station, label_datum, label_bericht, label_goedkeuring, frame_keuringButtons, 
+                               frame_keuringmod, label_keuringnaam, label_keuringemail, event):
     # Wanneer de gebruiker een bericht selecteer update frame_bericht met de juiste gegevens
     for index in listbox_berichten.curselection(): # check wat is geselecteerd
         bericht = berichten_lijst[index]
@@ -125,11 +129,21 @@ def listbox_berichten_selected(label_naam, label_station, label_datum, label_ber
         if bericht['goedgekeurd']:
             goedkeuring = "Goedgekeurd"
             frame_keuringButtons.forget()
+            
+            frame_keuringmod.pack(anchor="w", side="left")
+            label_keuringnaam["text"] = f"Naam mod: {bericht['naam']}"
+            label_keuringemail["text"] = f"Email mod: {bericht['email']}"
+            
         elif bericht['goedgekeurd'] == False:
             goedkeuring = "Niet goedgekeurd"
             frame_keuringButtons.forget()
+            
+            frame_keuringmod.pack(anchor="w", side="left")
+            label_keuringnaam["text"] = f"Naam mod: {bericht['naam']}"
+            label_keuringemail["text"] = f"Email mod: {bericht['email']}"
         else:
             goedkeuring = "Nog niet beoordeeld"
+            frame_keuringmod.forget()
             frame_keuringButtons.pack(pady=5,anchor="w",
                        side="left")
         
@@ -615,8 +629,18 @@ def load_mod():
                              text="Keur goed",
                              command=partial(keur_bericht, True, label_goedkeuring))
     button_keurgoed.pack(padx=5,
-                         anchor="w",
-                         side="left")
+                         anchor="w")
+    
+    frame_keuringmod = Frame(master=frame_bericht)
+    frame_keuringmod.pack(anchor="w", side="left")
+    
+    label_keuringnaam = Label(master=frame_keuringmod, text="Mod naam: ")
+    label_keuringnaam.pack(anchor="w")
+    
+    label_keuringemail = Label(master=frame_keuringmod, text="Mod email: ")
+    label_keuringemail.pack(anchor="w")
+    
+    frame_keuringmod.forget()
     
     button_keurAf = Button(master=frame_keuringButtons,
                              text="Keur niet goed",
@@ -631,7 +655,9 @@ def load_mod():
                                                         label_naam, label_station, 
                                                         label_datum, label_bericht, 
                                                         label_goedkeuring, 
-                                                        frame_keuringButtons))
+                                                        frame_keuringButtons,
+                                                        frame_keuringmod, label_keuringnaam,
+                                                        label_keuringemail))
     
     update_berichten()
     
