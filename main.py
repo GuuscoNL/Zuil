@@ -60,7 +60,7 @@ def krijg_alle_berichten():
                         moderator.email
                 FROM beoordeling AS L
                     RIGHT JOIN bericht AS R ON L.berichtid = R.id
-                    RIGHT JOIN moderator AS moderator ON moderator.id = L.moderatorid
+                    INNER JOIN moderator AS moderator ON moderator.id = L.moderatorid
                 ORDER BY datumtijd DESC;"""
     cursor.execute(query)
     return cursor.fetchall()
@@ -94,22 +94,15 @@ def krijg_faciliteiten(station):
     cursor.execute(query, data)
     return cursor.fetchall()
 
-def mod_login(entry_naam, entry_email, label_info):
-    naam = entry_naam.get()
+def mod_login(label_info):
+    naam = entry_mod_naam.get()
     
-    email = entry_email.get()
+    email = entry_mod_email.get()
     
     # Kijk of de moderator bestaat
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    query = """ SELECT id FROM moderator
-                WHERE naam = %s AND email = %s"""
-    data = (naam, email)
-    cursor.execute(query, data)
-    mod = None
-    for record in cursor.fetchall():
-        mod = record
+    succes, mod = is_mod_in_database(naam, email)
 
-    if mod is None:
+    if not succes:
         label_info["text"] = "Mod account bestaat niet, probeer opnieuw"
     else:
         global cur_mod # Maak global zodat het later makkelijk kan worden gebruikt
@@ -189,6 +182,47 @@ def update_berichten():
         # Zet het bericht in deze lijst, zodat het alter gebruikt kan worden door andere functions
         berichten_lijst.append(bericht) 
 
+def maak_mod_account(label_info):
+    # Zet een nieuwe mod account in de database
+    naam = entry_mod_naam.get()
+    email = entry_mod_email.get()
+    if naam == "":
+        label_info["text"] = "Naam mag niet leeg zijn"
+        return
+    if email == "":
+        label_info["text"] = "Email mag niet leeg zijn"
+        return
+    
+    succes, mod = is_mod_in_database(naam, email)
+    
+    if succes: # Bestaat de mod al?
+        label_info["text"] = "Mod account bestaat al"
+        return
+    
+    cursor = conn.cursor()
+    query = """ INSERT INTO moderator(naam, email)
+                VALUES
+                    (%s, %s);"""
+    data = (entry_mod_naam.get(), entry_mod_email.get())
+    cursor.execute(query, data)
+    conn.commit()
+    cur_mod = mod
+    modInlog_change_to_mod()
+
+def is_mod_in_database(naam, email):
+    # Check dat de moderator al in de database staat
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = """ SELECT id FROM moderator
+                WHERE naam = %s AND email = %s"""
+    data = (naam, email)
+    cursor.execute(query, data)
+    mod = None
+    for record in cursor.fetchall():
+        mod = record
+    
+    if mod is None:
+        return False, None
+    return True, mod
 
 # ---------- GUI ----------
 
@@ -518,7 +552,7 @@ Min: {temp["temp_min"]:9} C"""
     schermIsOpen = True
 
 def load_modInlog():
-    # Op deze pagina de gebruiker kan inloggen als een moderator
+    # Op deze pagina kan de gebruiker inloggen als een moderator
     
     global page_modInlog
     page_modInlog = Frame(root)
@@ -553,8 +587,14 @@ def load_modInlog():
     button_logIn = Button(page_modInlog, 
                         text="Log in",
                         cursor="hand2",
-                        command=partial(mod_login, entry_mod_naam, entry_mod_email, label_info))
+                        command=partial(mod_login, label_info))
     button_logIn.pack(pady=5)
+    
+    button_maakAccount = Button(master=page_modInlog, 
+                                text="Maak nieuw account aan",
+                                cursor="hand2",
+                                command=partial(maak_mod_account, label_info))
+    button_maakAccount.pack(pady=5)
     
     label_info.pack()
     
