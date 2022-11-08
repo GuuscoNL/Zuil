@@ -60,7 +60,7 @@ def krijg_alle_berichten():
                         moderator.email
                 FROM beoordeling AS L
                     RIGHT JOIN bericht AS R ON L.berichtid = R.id
-                    INNER JOIN moderator AS moderator ON moderator.id = L.moderatorid
+                    LEFT JOIN moderator AS moderator ON moderator.id = L.moderatorid
                 ORDER BY datumtijd DESC;"""
     cursor.execute(query)
     return cursor.fetchall()
@@ -348,7 +348,7 @@ def load_reiziger():
     page_reiziger.pack(fill="both", expand=1)
 
     label_title = Label(master=page_reiziger, 
-                        text="Welkom!\nU kunt hier een bericht maken dat op het stationsscherm word laten zien",)
+                        text="Welkom!\nU kunt hier een bericht maken dat op het station scherm word laten zien")
     label_title.pack(pady=5)
 
     frame_naam = Frame(page_reiziger)
